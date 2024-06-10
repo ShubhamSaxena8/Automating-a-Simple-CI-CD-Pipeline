@@ -24,8 +24,6 @@ on:
         default: false
         type: boolean
 
-# Always make sure the least amount of permissions is requested
-# and that the requested permissions are needed
 permissions:
   contents: read
   pages: write
@@ -42,8 +40,6 @@ jobs:
   ################################
   ## Run all the tests and linters
   ################################
-  # This is a good place to run all the tests necessary to build confidence
-  # that the changes introduced did not break anything.
   test:
     runs-on: ubuntu-latest
     env:
@@ -54,25 +50,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          # Fetching the full git history is not required for this job
-          # this will save us some time and disk space.
           fetch-depth: 0
 
-      # This step will guarantee that we install Node 18 which is needed for our
-      # project. This will also make sure that the environment is ready to run.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
       
-      # Cache node_modules to speed up the workflow
-      # this will use the runner.os (ubuntu-latest) and the hash of the package-lock.json
-      # as the key to our cache. This means that if the package-lock.json changes
-      # the cache will be invalidated and the dependencies will be reinstalled.
-      # If the cache key is not found (first time running for example) the step will
-      # pass anyway.
-      #
-      # Read more: https://github.com/actions/cache
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
@@ -89,10 +73,6 @@ jobs:
       - name: Run all the scripts
         run: |
           node script/url-checker.js -t ${{ vars.URL_CHECKER_TIMEOUT }}
-
-      # Normally a step to run a test suite would go here
-      # but this project doesn't have tests, so we're going to skip
-      # that step.
 
   #########################
   ## Build our static site
@@ -127,30 +107,16 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # This will build the distribution files for our site
-      # and store them in the _site/ directory.
       - name: Build distribution files
         run:
-          # Split the path prefix and extract the repository name
-          # ${{ github.repository }} is in the format owner/repo
-          # and we only need the repo name for the path prefix
           PATH_PREFIX="/$(echo '${{ github.repository }}' | cut -d'/' -f2-)/"
           npm run prod
 
-      # A Pages artifact must:
-      #  - be called github-pages
-      #  - be a single gzip archive containing a single tar file
-      # Read more: https://github.com/actions/upload-pages-artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "_site/"
   
-  #########################
-  ## Deploy to GitHub Pages
-  #########################
-  # This is the last job of our workflow. We will use the actions/deploy-pages action
-  # to deploy our site to GitHub Pages. This action will take care of everything for us.
   deploy:
     environment: 
       name: github-pages
@@ -165,8 +131,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # This step will report the status of the deployment to an issue
-      # in the repository. This is useful to keep track of the deployments
       - name: Report status
         run: |
           # Authenticate gh cli with the GITHUB_TOKEN
