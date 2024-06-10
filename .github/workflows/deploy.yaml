@@ -36,10 +36,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
-  ################################
-  ## Run all the tests and linters
-  ################################
   test:
     runs-on: ubuntu-latest
     env:
@@ -74,9 +70,6 @@ jobs:
         run: |
           node script/url-checker.js -t ${{ vars.URL_CHECKER_TIMEOUT }}
 
-  #########################
-  ## Build our static site
-  #########################
   build:
     runs-on: ubuntu-latest
     
