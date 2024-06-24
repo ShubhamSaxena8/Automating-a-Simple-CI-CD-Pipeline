@@ -93,7 +93,7 @@ jobs:
 
       - name: Build distribution files
         run: |
-          PATH_PREFIX = ${{ vars.PATH_PREFIX }}
+          PATH_PREFIX=${{ vars.PATH_PREFIX }}
           npm run prod
 
       - name: Upload GitHub Pages artifact
